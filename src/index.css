@@ -1,0 +1,167 @@
+@import './styles/animations.css';
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --bg: #080a09;
+    --bg-2: #0d100e;
+    --text: #f5f5f0;
+    --mute: #92978f;
+    --lime: #c5f467;
+    --line: rgba(255, 255, 255, 0.09);
+    color-scheme: dark;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    @apply bg-ink font-sans text-bone antialiased;
+    overflow-x: hidden;
+    text-rendering: optimizeLegibility;
+  }
+
+  /* Scrollbar — Firefox only (Chrome 121+ ignores ::-webkit-scrollbar when these are set) */
+  @supports not selector(::-webkit-scrollbar) {
+    html {
+      scrollbar-width: thin;
+      scrollbar-color: rgba(197, 244, 103, 0.35) var(--bg);
+    }
+  }
+
+  /* Scrollbar — Chrome, Edge, Safari */
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-track {
+    background: var(--bg);
+    border-left: 1px solid var(--line);
+  }
+  ::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, rgba(197, 244, 103, 0.45), rgba(197, 244, 103, 0.2));
+    border: 3px solid var(--bg);
+    border-radius: 999px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--lime);
+  }
+  ::-webkit-scrollbar-corner {
+    background: var(--bg);
+  }
+
+  ::selection {
+    background: var(--lime);
+    color: var(--bg);
+  }
+
+  :focus-visible {
+    outline: 1.5px solid var(--lime);
+    outline-offset: 4px;
+    border-radius: 6px;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    @apply font-display;
+  }
+
+  @media (pointer: fine) {
+    body.has-cursor,
+    body.has-cursor a,
+    body.has-cursor button {
+      cursor: none;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+  }
+}
+
+@layer components {
+  .container-x {
+    @apply mx-auto w-full max-w-[1320px] px-5 sm:px-8 lg:px-12;
+  }
+
+  .label-mono {
+    @apply font-mono text-[11px] uppercase tracking-[0.18em] text-mute;
+  }
+
+  .hairline {
+    border-color: var(--line);
+  }
+
+  .glass {
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.035), rgba(255, 255, 255, 0.01));
+    border: 1px solid var(--line);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+  }
+
+  .grid-bg {
+    background-image: linear-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
+    background-size: 64px 64px;
+  }
+
+  .grid-bg-fine {
+    background-image: linear-gradient(rgba(255, 255, 255, 0.025) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
+    background-size: 16px 16px;
+  }
+
+  .text-gradient {
+    background: linear-gradient(100deg, #f5f5f0 20%, #c5f467 60%, #f5f5f0 100%);
+    background-size: 200% 100%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  .text-outline {
+    color: transparent;
+    -webkit-text-stroke: 1px rgba(245, 245, 240, 0.35);
+  }
+
+  .chip {
+    @apply inline-flex items-center rounded-full border px-3 py-1 font-mono text-[11px] text-bone/80;
+    border-color: var(--line);
+    background: rgba(255, 255, 255, 0.02);
+  }
+
+  /* Animated gradient border driven by --angle (see animations.css) */
+  .border-spin {
+    position: relative;
+    isolation: isolate;
+  }
+  .border-spin::before {
+    content: '';
+    position: absolute;
+    inset: -1px;
+    border-radius: inherit;
+    padding: 1px;
+    background: conic-gradient(from var(--angle), transparent 0deg, transparent 260deg, rgba(197, 244, 103, 0.9) 320deg, transparent 360deg);
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+    animation: angle-spin 4s linear infinite;
+    z-index: 1;
+    pointer-events: none;
+  }
+  .border-spin:hover::before,
+  .border-spin:focus-within::before {
+    opacity: 1;
+  }
+}
