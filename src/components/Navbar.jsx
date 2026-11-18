@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { ArrowUpRight, Menu, X } from 'lucide-react';
+import { ArrowUpRight, Download, Menu, X } from 'lucide-react';
 import { navLinks, profile } from '../data/portfolio.js';
 import useActiveSection from '../hooks/useActiveSection.js';
 import { EASE } from './AnimatedText.jsx';
+import { lockScroll } from '../lib/smoothScroll.js';
 
 const ids = navLinks.map((l) => l.id);
 
@@ -20,7 +21,7 @@ export default function Navbar() {
   }, []);
 
   useEffect(() => {
-    document.body.style.overflow = open ? 'hidden' : '';
+    lockScroll(open);
     const onKey = (e) => e.key === 'Escape' && setOpen(false);
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
@@ -81,6 +82,17 @@ export default function Navbar() {
             </span>
             Available for opportunities
           </span>
+          {profile.resume && (
+            <a
+              href={profile.resume}
+              target="_blank"
+              rel="noreferrer"
+              className="hidden items-center gap-1.5 rounded-full border border-white/15 px-4 py-2 text-[13px] text-bone transition-colors hover:border-lime hover:text-lime md:inline-flex"
+            >
+              Résumé
+              <Download size={13} aria-hidden="true" />
+            </a>
+          )}
           <a
             href="#contact"
             className="group hidden items-center gap-1.5 rounded-full bg-bone px-4 py-2 text-[13px] font-medium text-ink transition-colors hover:bg-lime sm:inline-flex"
@@ -138,7 +150,7 @@ export default function Navbar() {
                     }`}
                   >
                     {l.label}
-                    <span className="font-mono text-[11px] text-mute">0{i}</span>
+                    <span className="font-mono text-[11px] text-mute">{String(i + 1).padStart(2, '0')}</span>
                   </a>
                 </motion.li>
               ))}
@@ -150,6 +162,11 @@ export default function Navbar() {
               <a href={`mailto:${profile.email}`} className="block text-bone">
                 {profile.email}
               </a>
+              {profile.resume && (
+                <a href={profile.resume} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 text-lime">
+                  Download résumé <Download size={14} aria-hidden="true" />
+                </a>
+              )}
             </div>
           </motion.div>
         )}

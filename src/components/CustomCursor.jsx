@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { motion, useMotionValue, useSpring } from 'framer-motion';
+import { AnimatePresence, motion, useMotionValue, useSpring } from 'framer-motion';
 import useReducedMotion from '../hooks/useReducedMotion.js';
 
 /** Desktop-only cursor: precise dot + lagging ring that expands over interactive elements. */
@@ -7,6 +7,7 @@ export default function CustomCursor() {
   const reduced = useReducedMotion();
   const [enabled, setEnabled] = useState(false);
   const [hover, setHover] = useState(false);
+  const [label, setLabel] = useState('');
   const [down, setDown] = useState(false);
   const [visible, setVisible] = useState(false);
   const x = useMotionValue(-100);
@@ -26,6 +27,8 @@ export default function CustomCursor() {
       y.set(e.clientY);
       setVisible(true);
       const t = e.target;
+      const labelled = t && t.closest && t.closest('[data-cursor-label]');
+      setLabel(labelled ? labelled.getAttribute('data-cursor-label') : '');
       setHover(Boolean(t && t.closest && t.closest('a, button, [data-cursor="hover"]')));
     };
     const leave = () => setVisible(false);
@@ -49,22 +52,37 @@ export default function CustomCursor() {
   return (
     <div
       aria-hidden="true"
-      className="pointer-events-none fixed inset-0 z-[90] transition-opacity duration-300"
+      className="pointer-events-none fixed inset-0 z-[150] transition-opacity duration-300"
       style={{ opacity: visible ? 1 : 0 }}
     >
       <motion.div className="fixed left-0 top-0" style={{ x: rx, y: ry }}>
         <motion.div
-          className="-translate-x-1/2 -translate-y-1/2 rounded-full border border-lime/70"
+          className="flex -translate-x-1/2 -translate-y-1/2 items-center justify-center overflow-hidden rounded-full border border-lime/70"
           animate={{
-            width: hover ? 64 : 34,
-            height: hover ? 64 : 34,
-            backgroundColor: hover ? 'rgba(197,244,103,0.08)' : 'rgba(197,244,103,0)',
+            width: label ? 96 : hover ? 64 : 34,
+            height: label ? 96 : hover ? 64 : 34,
+            backgroundColor: label ? 'rgba(197,244,103,1)' : hover ? 'rgba(197,244,103,0.08)' : 'rgba(197,244,103,0)',
             scale: down ? 0.82 : 1,
           }}
           transition={{ type: 'spring', stiffness: 300, damping: 24 }}
-        />
+        >
+          <AnimatePresence>
+            {label && (
+              <motion.span
+                key={label}
+                initial={{ opacity: 0, scale: 0.6 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.6 }}
+                transition={{ duration: 0.2 }}
+                className="whitespace-nowrap font-display text-[13px] font-semibold tracking-tight text-ink"
+              >
+                {label} ↗
+              </motion.span>
+            )}
+          </AnimatePresence>
+        </motion.div>
       </motion.div>
-      <motion.div className="fixed left-0 top-0" style={{ x, y }}>
+      <motion.div className="fixed left-0 top-0" style={{ x, y }} animate={{ opacity: label ? 0 : 1 }}>
         <div className="h-1.5 w-1.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-lime" />
       </motion.div>
     </div>

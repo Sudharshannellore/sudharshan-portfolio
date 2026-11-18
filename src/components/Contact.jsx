@@ -1,10 +1,11 @@
 import { useState } from 'react';
 import { motion, useTransform } from 'framer-motion';
-import { ArrowUpRight, Check, Copy, Github, Linkedin, Mail } from 'lucide-react';
+import { ArrowUpRight, Check, Copy, Download, Github, Linkedin, Mail } from 'lucide-react';
 import { contact, profile } from '../data/portfolio.js';
 import AnimatedText, { EASE, Reveal } from './AnimatedText.jsx';
 import MagneticButton from './MagneticButton.jsx';
 import WireSphere from './visuals/WireSphere.jsx';
+import { VelocityMarquee } from './Marquee.jsx';
 import usePointer from '../hooks/usePointer.js';
 import useReducedMotion from '../hooks/useReducedMotion.js';
 
@@ -64,7 +65,22 @@ export default function Contact() {
   ];
 
   return (
-    <section id="contact" aria-labelledby="contact-heading" className="relative overflow-hidden pb-14 pt-20 sm:pt-24">
+    <section id="contact" aria-labelledby="contact-heading" className="relative overflow-hidden pb-14 pt-10 sm:pt-12">
+      <VelocityMarquee className="mb-14 border-y border-white/[0.06] py-5 sm:mb-20 sm:py-7">
+        {['Let’s build', 'Something that scales', 'Open to work'].map((t, i) => (
+          <span key={t} className="flex items-center">
+            <span
+              className={`px-6 font-display text-[clamp(2.8rem,8vw,7.5rem)] font-medium leading-none tracking-tightest ${
+                i === 1 ? 'text-lime' : i === 2 ? 'text-outline' : 'text-bone'
+              }`}
+            >
+              {t}
+            </span>
+            <span className="text-[clamp(1.6rem,4vw,3.5rem)] text-lime">✦</span>
+          </span>
+        ))}
+      </VelocityMarquee>
+
       <div className="container-x relative">
         <div className="mb-6 flex items-center gap-4">
           <span className="font-mono text-[11px] text-lime">06</span>
@@ -104,6 +120,17 @@ export default function Contact() {
                 {copied ? <Check size={15} className="text-lime" /> : <Copy size={15} />}
                 {copied ? 'Email copied' : 'Copy email'}
               </button>
+              {profile.resume && (
+                <a
+                  href={profile.resume}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex min-h-[48px] items-center gap-2 rounded-full border border-white/15 px-5 text-sm text-bone transition-colors hover:border-lime/60 hover:text-lime"
+                >
+                  <Download size={15} aria-hidden="true" />
+                  Résumé
+                </a>
+              )}
             </Reveal>
           </div>
 
@@ -112,7 +139,7 @@ export default function Contact() {
           </Reveal>
         </div>
 
-        <ul className="mt-12 grid border-t border-white/[0.08] md:grid-cols-3">
+        <ul className="mt-14 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {links.map((l, i) => (
             <motion.li
               key={l.label}
@@ -120,29 +147,31 @@ export default function Contact() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.8, ease: EASE, delay: i * 0.1 }}
-              className="border-b border-white/[0.08] md:border-b-0 md:border-r md:last:border-r-0"
+              className={i === links.length - 1 ? 'sm:col-span-2 lg:col-span-1' : ''}
             >
               <a
                 href={l.href}
                 target={l.external ? '_blank' : undefined}
                 rel={l.external ? 'noreferrer' : undefined}
                 aria-label={l.external ? `${l.label} (opens in new tab)` : `Send an email to ${profile.email}`}
-                className="group flex items-center justify-between gap-4 py-5 transition-colors md:px-6 md:first:pl-0"
+                className="group relative flex h-full items-center gap-4 overflow-hidden rounded-2xl border border-white/[0.08] bg-white/[0.02] p-4 transition-all duration-500 hover:-translate-y-0.5 hover:border-lime/40 hover:bg-lime/[0.04] sm:p-5"
               >
-                <span className="flex items-center gap-4">
-                  <span className="grid h-11 w-11 place-items-center rounded-full border border-white/10 transition-colors duration-300 group-hover:border-lime group-hover:bg-lime group-hover:text-ink">
-                    <l.icon size={17} aria-hidden="true" />
-                  </span>
-                  <span>
-                    <span className="label-mono block !text-[10px]">{l.label}</span>
-                    <span className="mt-1 block break-all text-[14px] text-bone sm:text-[15px]">{l.value}</span>
+                <span
+                  aria-hidden="true"
+                  className="pointer-events-none absolute inset-x-0 bottom-0 h-px origin-left scale-x-0 bg-gradient-to-r from-lime via-lime/60 to-transparent transition-transform duration-700 group-hover:scale-x-100"
+                />
+                <span className="grid h-12 w-12 shrink-0 place-items-center rounded-xl border border-white/10 bg-ink/60 text-bone transition-all duration-300 group-hover:border-lime group-hover:bg-lime group-hover:text-ink">
+                  <l.icon size={18} aria-hidden="true" />
+                </span>
+                <span className="min-w-0 flex-1">
+                  <span className="label-mono block !text-[10px]">{l.label}</span>
+                  <span className="mt-1 block truncate text-[14px] text-bone transition-colors duration-300 group-hover:text-lime sm:text-[15px]">
+                    {l.value}
                   </span>
                 </span>
-                <ArrowUpRight
-                  size={18}
-                  aria-hidden="true"
-                  className="shrink-0 text-mute transition-all duration-300 group-hover:rotate-45 group-hover:text-lime"
-                />
+                <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full border border-white/10 text-mute transition-all duration-300 group-hover:rotate-45 group-hover:border-lime group-hover:text-lime">
+                  <ArrowUpRight size={16} aria-hidden="true" />
+                </span>
               </a>
             </motion.li>
           ))}

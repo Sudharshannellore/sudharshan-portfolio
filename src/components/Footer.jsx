@@ -57,27 +57,6 @@ export default function Footer() {
           </span>
         </div>
       </div>
-
-      <svg
-        aria-hidden="true"
-        viewBox="0 0 1000 150"
-        className="pointer-events-none -mb-[1.5%] block w-full select-none px-3 sm:px-5"
-      >
-        <text
-          x="500"
-          y="140"
-          textAnchor="middle"
-          textLength="990"
-          lengthAdjust="spacingAndGlyphs"
-          fill="rgba(255,255,255,0.03)"
-          fontFamily="'Space Grotesk', sans-serif"
-          fontWeight="600"
-          fontSize="180"
-          letterSpacing="-6"
-        >
-          {profile.brand}
-        </text>
-      </svg>
     </footer>
   );
 }

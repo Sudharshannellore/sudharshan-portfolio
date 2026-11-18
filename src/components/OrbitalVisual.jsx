@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { motion, useTransform } from 'framer-motion';
+import { motion, useInView, useTransform } from 'framer-motion';
 import WireSphere from './visuals/WireSphere.jsx';
 import usePointer from '../hooks/usePointer.js';
 import useReducedMotion from '../hooks/useReducedMotion.js';
@@ -15,7 +15,7 @@ const RINGS = [
  * The hero's computational universe: canvas wireframe sphere, CSS-3D orbital
  * rings, orbiting technology labels with depth, SVG data paths and HUD marks.
  */
-export default function OrbitalVisual({ labels = [], compact = false }) {
+export default function OrbitalVisual({ labels = [], notes, compact = false }) {
   const reduced = useReducedMotion();
   const { x, y } = usePointer({ disabled: reduced });
   const rotY = useTransform(x, [-1, 1], [-10, 10]);
@@ -82,7 +82,7 @@ export default function OrbitalVisual({ labels = [], compact = false }) {
 
       {/* orbiting labels */}
       <motion.div className="absolute inset-0" style={{ x: shiftX, y: shiftY }}>
-        <OrbitLabels labels={shown} reduced={reduced} />
+        <OrbitLabels labels={shown} notes={notes} reduced={reduced} />
       </motion.div>
 
       {!compact && <Hud />}
@@ -90,9 +90,17 @@ export default function OrbitalVisual({ labels = [], compact = false }) {
   );
 }
 
-function OrbitLabels({ labels, reduced }) {
+function OrbitLabels({ labels, notes, reduced }) {
+  const wrapRef = useRef(null);
   const refs = useRef([]);
+  const hoveredRef = useRef(-1);
+  const [hovered, setHovered] = useState(-1);
   const [ready, setReady] = useState(false);
+  const onScreen = useInView(wrapRef, { margin: '10% 0px' });
+
+  useEffect(() => {
+    hoveredRef.current = hovered;
+  }, [hovered]);
 
   useEffect(() => {
     const n = labels.length;
@@ -105,6 +113,8 @@ function OrbitLabels({ labels, reduced }) {
       speed: i % 2 ? 0.00011 : 0.00008,
     }));
     let raf = 0;
+    let last = 0;
+    let clock = 0; // orbit time; frozen while a label is hovered
     const place = (t) => {
       conf.forEach((c, i) => {
         const el = refs.current[i];
@@ -114,38 +124,62 @@ function OrbitLabels({ labels, reduced }) {
         const zz = Math.sin(a);
         const yy = zz * c.ry + c.yo;
         const depth = (zz + 1) / 2; // 0 back, 1 front
-        const s = 0.72 + depth * 0.38;
+        const focus = hoveredRef.current === i;
+        const s = focus ? 1.2 : 0.72 + depth * 0.38;
         el.style.transform = `translate(-50%, -50%) translate3d(${xx}cqw, ${yy}cqw, 0) scale(${s})`;
-        el.style.opacity = String(0.25 + depth * 0.75);
-        el.style.zIndex = String(Math.round(depth * 10));
-        el.style.filter = depth < 0.35 ? 'blur(0.6px)' : 'none';
+        el.style.opacity = focus ? '1' : String(0.25 + depth * 0.75);
+        el.style.zIndex = focus ? '20' : String(Math.round(depth * 10));
+        el.style.filter = !focus && depth < 0.35 ? 'blur(0.6px)' : 'none';
       });
     };
     const loop = (t) => {
-      place(t);
+      const dt = last ? Math.min(t - last, 50) : 0;
+      last = t;
+      if (hoveredRef.current === -1) clock += dt;
+      place(clock);
       raf = requestAnimationFrame(loop);
     };
     place(0);
     setReady(true);
-    if (!reduced) raf = requestAnimationFrame(loop);
+    if (!reduced && onScreen) raf = requestAnimationFrame(loop);
     return () => cancelAnimationFrame(raf);
-  }, [labels, reduced]);
+  }, [labels, reduced, onScreen]);
 
   return (
-    <div className="absolute inset-0" style={{ containerType: 'inline-size' }}>
-      {labels.map((label, i) => (
-        <div
-          key={label}
-          ref={(el) => (refs.current[i] = el)}
-          className="absolute left-1/2 top-1/2 will-change-transform"
-          style={{ opacity: ready ? undefined : 0 }}
-        >
-          <span className="flex items-center gap-1.5 whitespace-nowrap rounded-full border border-white/10 bg-ink/70 px-2.5 py-1 font-mono text-[10px] text-bone/90 backdrop-blur-md sm:px-3 sm:text-[11px]">
-            <span className="h-1 w-1 rounded-full bg-lime" />
-            {label}
-          </span>
-        </div>
-      ))}
+    <div ref={wrapRef} className="absolute inset-0" style={{ containerType: 'inline-size' }}>
+      {labels.map((label, i) => {
+        const active = hovered === i;
+        const note = notes?.[label];
+        return (
+          <div
+            key={label}
+            ref={(el) => (refs.current[i] = el)}
+            className="pointer-events-auto absolute left-1/2 top-1/2 will-change-transform"
+            style={{ opacity: ready ? undefined : 0 }}
+            onPointerEnter={() => setHovered(i)}
+            onPointerLeave={() => setHovered(-1)}
+            data-cursor="hover"
+          >
+            <span
+              className={`flex items-center gap-1.5 whitespace-nowrap rounded-full border px-2.5 py-1 font-mono text-[10px] backdrop-blur-md transition-colors duration-300 sm:px-3 sm:text-[11px] ${
+                active ? 'border-lime bg-lime text-ink shadow-[0_0_24px_rgba(197,244,103,0.45)]' : 'border-white/10 bg-ink/70 text-bone/90'
+              }`}
+            >
+              <span className={`h-1 w-1 rounded-full ${active ? 'bg-ink' : 'bg-lime'}`} />
+              {label}
+            </span>
+            {note && (
+              <span
+                className={`pointer-events-none absolute left-1/2 top-full mt-2 w-max max-w-[220px] -translate-x-1/2 rounded-lg border border-lime/30 bg-ink/90 px-2.5 py-1.5 text-center font-mono text-[9px] leading-snug text-bone/90 backdrop-blur-md transition-all duration-300 ${
+                  active ? 'translate-y-0 opacity-100' : '-translate-y-1 opacity-0'
+                }`}
+              >
+                {note}
+              </span>
+            )}
+          </div>
+        );
+      })}
     </div>
   );
 }

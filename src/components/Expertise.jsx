@@ -1,5 +1,10 @@
 import { motion } from 'framer-motion';
-import { expertise } from '../data/portfolio.js';
+import { expertise, hero } from '../data/portfolio.js';
+import { TechMarquee } from './Marquee.jsx';
+
+const ALL_TECH = [...new Set([...hero.orbitLabels, ...expertise.cards.flatMap((c) => c.items)])];
+const MARQUEE_A = ALL_TECH.filter((_, i) => i % 2 === 0);
+const MARQUEE_B = ALL_TECH.filter((_, i) => i % 2 === 1);
 import SectionHeading from './SectionHeading.jsx';
 import TiltCard from './TiltCard.jsx';
 import NeuralNetwork from './NeuralNetwork.jsx';
@@ -114,6 +119,11 @@ export default function Expertise() {
             </motion.div>
           ))}
         </div>
+      </div>
+
+      <div className="mt-12 space-y-3 lg:mt-14">
+        <TechMarquee items={MARQUEE_A} duration={50} />
+        <TechMarquee items={MARQUEE_B} duration={55} reverse />
       </div>
     </section>
   );

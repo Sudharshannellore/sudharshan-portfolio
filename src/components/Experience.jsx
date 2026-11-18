@@ -56,7 +56,7 @@ export default function Experience() {
                 whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: true, margin: '-15% 0px' }}
                 transition={{ duration: 0.9, ease: EASE }}
-                className="pl-10 lg:pl-0 lg:pr-14 lg:text-right"
+                className="pl-10 lg:sticky lg:top-28 lg:self-start lg:pl-0 lg:pr-14 lg:text-right"
               >
                 <p className="font-mono text-[12px] tracking-wide text-lime">{r.period}</p>
                 {r.current && (

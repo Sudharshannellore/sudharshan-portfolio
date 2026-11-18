@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { motion } from 'framer-motion';
 
 const N = {
@@ -26,8 +27,13 @@ function curve(a, b) {
   return `M ${a.x} ${a.y} C ${mx} ${a.y}, ${mx} ${b.y}, ${b.x} ${b.y}`;
 }
 
-/** Animated service-architecture diagram used in the About section. */
+/** Animated service-architecture diagram used in the About section. Hover a node to trace its connections. */
 export default function ArchitectureDiagram() {
+  const [active, setActive] = useState(null);
+  const linked = active
+    ? new Set(EDGES.filter(([a, b]) => a === active || b === active).flat())
+    : null;
+
   return (
     <svg viewBox="0 0 540 420" className="h-full w-full" role="img" aria-label="Diagram of a service architecture: client, API gateway, auth, core and AI services, data store and event queue">
       <defs>
@@ -44,13 +50,16 @@ export default function ArchitectureDiagram() {
 
       {EDGES.map(([a, b], i) => {
         const d = curve(N[a], N[b]);
+        const on = active && (a === active || b === active);
+        const off = active && !on;
         return (
-          <g key={`${a}-${b}`}>
+          <g key={`${a}-${b}`} style={{ opacity: off ? 0.25 : 1, transition: 'opacity 0.35s ease' }}>
             <motion.path
               d={d}
               fill="none"
-              stroke="rgba(245,245,240,0.16)"
-              strokeWidth="1"
+              stroke={on ? 'rgba(197,244,103,0.85)' : 'rgba(245,245,240,0.16)'}
+              strokeWidth={on ? 1.6 : 1}
+              style={{ transition: 'stroke 0.35s ease, stroke-width 0.35s ease', filter: on ? 'drop-shadow(0 0 4px rgba(197,244,103,0.7))' : 'none' }}
               initial={{ pathLength: 0 }}
               whileInView={{ pathLength: 1 }}
               viewport={{ once: true }}
@@ -65,23 +74,30 @@ export default function ArchitectureDiagram() {
 
       {Object.entries(N).map(([k, n], i) => {
         const hub = k === 'gw' || k === 'core';
+        const lit = linked?.has(k);
+        const self = active === k;
         return (
           <motion.g
             key={k}
+            onPointerEnter={() => setActive(k)}
+            onPointerLeave={() => setActive(null)}
+            className="cursor-pointer"
             initial={{ opacity: 0, scale: 0.6 }}
             whileInView={{ opacity: 1, scale: 1 }}
             viewport={{ once: true }}
             transition={{ duration: 0.7, delay: 0.1 + i * 0.1, ease: [0.22, 1, 0.36, 1] }}
             style={{ transformOrigin: `${n.x}px ${n.y}px` }}
           >
+            <g style={{ opacity: active && !lit ? 0.35 : 1, transition: 'opacity 0.35s ease' }}>
             <rect
               x={n.x - 46}
               y={n.y - 22}
               width="92"
               height="44"
               rx="10"
-              fill="#0D100E"
-              stroke={hub ? 'rgba(197,244,103,0.6)' : 'rgba(255,255,255,0.14)'}
+              fill={self ? '#1A2112' : '#0D100E'}
+              stroke={self || lit ? 'rgba(197,244,103,0.9)' : hub ? 'rgba(197,244,103,0.6)' : 'rgba(255,255,255,0.14)'}
+              style={{ transition: 'fill 0.3s ease, stroke 0.3s ease' }}
             />
             <circle cx={n.x - 34} cy={n.y - 10} r="2.5" fill={hub ? '#C5F467' : 'rgba(245,245,240,0.5)'} className={hub ? 'anim-pulse' : ''} />
             <text x={n.x - 26} y={n.y - 6} fill="#F5F5F0" fontSize="9" fontFamily="JetBrains Mono, monospace" letterSpacing="1">
@@ -90,6 +106,7 @@ export default function ArchitectureDiagram() {
             <text x={n.x - 38} y={n.y + 12} fill="#92978F" fontSize="8" fontFamily="JetBrains Mono, monospace">
               {n.sub}
             </text>
+            </g>
           </motion.g>
         );
       })}

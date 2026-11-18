@@ -5,18 +5,8 @@ import { hero, profile } from '../data/portfolio.js';
 import AnimatedText, { EASE } from './AnimatedText.jsx';
 import MagneticButton from './MagneticButton.jsx';
 import OrbitalVisual from './OrbitalVisual.jsx';
-
-function useIsCompact() {
-  const [compact, setCompact] = useState(false);
-  useEffect(() => {
-    const mq = window.matchMedia('(max-width: 767px)');
-    const on = () => setCompact(mq.matches);
-    on();
-    mq.addEventListener('change', on);
-    return () => mq.removeEventListener('change', on);
-  }, []);
-  return compact;
-}
+import RotatingScramble from './RotatingScramble.jsx';
+import useMediaQuery from '../hooks/useMediaQuery.js';
 
 function Clock() {
   const [now, setNow] = useState('');
@@ -31,7 +21,7 @@ function Clock() {
 }
 
 export default function Hero() {
-  const compact = useIsCompact();
+  const compact = useMediaQuery('(max-width: 767px)');
   const { scrollY } = useScroll();
   const visualY = useTransform(scrollY, [0, 800], [0, 140]);
   const visualOpacity = useTransform(scrollY, [0, 700], [1, 0.2]);
@@ -48,11 +38,15 @@ export default function Hero() {
           style={{ y: visualY, opacity: visualOpacity }}
           className="pointer-events-none absolute right-[-18%] top-[18%] w-[80vw] opacity-50 lg:right-[2%] lg:top-[calc(50%-min(22vw,340px,40vh)+24px)] lg:w-[min(44vw,680px,80vh)] lg:opacity-100"
         >
-          <OrbitalVisual labels={hero.orbitLabels} />
+          <OrbitalVisual labels={hero.orbitLabels} notes={hero.orbitNotes} />
         </motion.div>
       )}
 
-      <motion.div style={{ y: textY }} className="container-x relative z-10 flex flex-1 flex-col justify-center pb-10">
+      {/* pointer-events pass through the empty area so the orbit labels behind stay hoverable */}
+      <motion.div
+        style={{ y: textY }}
+        className="container-x pointer-events-none relative z-10 flex flex-1 flex-col justify-center pb-10 [&>*]:pointer-events-auto"
+      >
         {/* mobile visual: in-flow, simplified composition above the headline */}
         {compact && (
           <motion.div
@@ -61,17 +55,24 @@ export default function Hero() {
             transition={{ duration: 1.6, ease: EASE, delay: 0.4 }}
             className="pointer-events-none mx-auto -mt-4 mb-4 w-[92%] max-w-[360px]"
           >
-            <OrbitalVisual labels={hero.orbitLabels} compact />
+            <OrbitalVisual labels={hero.orbitLabels} notes={hero.orbitNotes} compact />
           </motion.div>
         )}
         <motion.p
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, ease: EASE, delay: 0.3 }}
-          className="label-mono mb-5 flex items-center gap-3"
+          className="label-mono mb-5 flex w-fit items-center gap-3"
         >
           <span className="inline-block h-px w-10 bg-lime" />
-          <span className="text-lime">{hero.eyebrow}</span>
+          <span className="sr-only">{hero.eyebrow}</span>
+          {hero.roles?.length ? (
+            <RotatingScramble words={hero.roles} className="text-lime" />
+          ) : (
+            <span className="text-lime" aria-hidden="true">
+              {hero.eyebrow}
+            </span>
+          )}
         </motion.p>
 
         <AnimatedText
@@ -100,7 +101,7 @@ export default function Hero() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 1, ease: EASE, delay: 1.3 }}
-          className="mt-8 flex flex-wrap items-center gap-3"
+          className="mt-8 flex w-fit flex-wrap items-center gap-3"
         >
           <MagneticButton href="#projects">
             Explore My Work

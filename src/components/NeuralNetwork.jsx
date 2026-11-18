@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useState } from 'react';
-import { motion } from 'framer-motion';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { motion, useInView } from 'framer-motion';
 import useReducedMotion from '../hooks/useReducedMotion.js';
 
 const LAYERS = [3, 5, 6, 5, 2];
@@ -9,6 +9,8 @@ const H = 300;
 /** Abstract neural network: layered nodes, glowing links and travelling signals. */
 export default function NeuralNetwork({ className = '' }) {
   const reduced = useReducedMotion();
+  const svgRef = useRef(null);
+  const onScreen = useInView(svgRef, { margin: '10% 0px' });
 
   const { nodes, edges } = useMemo(() => {
     const nodes = [];
@@ -43,15 +45,15 @@ export default function NeuralNetwork({ className = '' }) {
       setPath(p);
     };
     pick();
-    if (reduced) return undefined;
+    if (reduced || !onScreen) return undefined;
     const id = setInterval(pick, 1600);
     return () => clearInterval(id);
-  }, [nodes, reduced]);
+  }, [nodes, reduced, onScreen]);
 
   const activeNodes = new Set(path.flatMap((e) => e.split('>')));
 
   return (
-    <svg viewBox={`0 0 ${W} ${H}`} className={className} aria-hidden="true">
+    <svg ref={svgRef} viewBox={`0 0 ${W} ${H}`} className={className} aria-hidden="true">
       <defs>
         <radialGradient id="nn-glow">
           <stop offset="0" stopColor="#C5F467" stopOpacity="0.8" />

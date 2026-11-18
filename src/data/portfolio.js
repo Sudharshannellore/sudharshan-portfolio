@@ -14,6 +14,8 @@ export const profile = {
   linkedin: 'https://www.linkedin.com/in/sudharshannellore/',
   github: 'https://github.com/Sudharshannellore',
   githubHandle: 'Sudharshannellore',
+  // Path to your résumé PDF in /public (e.g. '/resume.pdf'). Leave '' to hide the résumé buttons.
+  resume: '',
   availability:
     'Open to full-time opportunities, freelance projects, SaaS development, AI integrations, and collaborations.',
 };
@@ -24,15 +26,30 @@ export const navLinks = [
   { id: 'expertise', label: 'Expertise' },
   { id: 'experience', label: 'Experience' },
   { id: 'projects', label: 'Projects' },
+  { id: 'education', label: 'Education' },
   { id: 'contact', label: 'Contact' },
 ];
 
 export const hero = {
   eyebrow: 'Full-Stack Developer / Backend Engineer',
+  // Cycled in the hero eyebrow with a scramble effect.
+  roles: ['Full-Stack Developer', 'Backend Engineer', 'SaaS Developer', 'AI Application Developer'],
   headline: ['Engineering', 'digital experiences', 'that scale.'],
   supporting:
     'I build scalable backend systems, intelligent SaaS platforms, and AI-powered applications — turning complex ideas into production-ready products.',
   orbitLabels: ['NestJS', 'Node.js', 'Python', 'FastAPI', 'React', 'Next.js', 'MongoDB', 'OpenAI', 'LangGraph'],
+  // One-liners shown when an orbiting label is hovered.
+  orbitNotes: {
+    NestJS: 'REST APIs at PRove IT & codinglimits · BillStack, CRMAI',
+    'Node.js': 'Express backends for Luxe Hair & LocalBazaar',
+    Python: 'Backend services at PRove IT Catalysts',
+    FastAPI: 'LogicCraft API · services at PRove IT',
+    React: 'Frontends for every project in the gallery',
+    'Next.js': 'Frontend applications at PRove IT',
+    MongoDB: 'The data layer behind all five products',
+    OpenAI: 'CRMAI copilot via function calling',
+    LangGraph: 'AI backend workflows at codinglimits',
+  },
 };
 
 export const about = {
