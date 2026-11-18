@@ -97,40 +97,4 @@ export const projects = [
     live: 'https://local-bazaar.vercel.app/',
     placeholder: false,
   },
-  {
-    title: 'Project Title — SaaS Platform',
-    category: 'SaaS · Full-Stack',
-    description:
-      'Placeholder: describe the product, the problem it solves and the parts you engineered. Edit this entry in src/data/projects.js.',
-    stack: ['NestJS', 'React', 'MongoDB'],
-    visual: 'dashboard',
-    image: '',
-    github: '',
-    live: '',
-    placeholder: true,
-  },
-  {
-    title: 'Project Title — AI Workflow',
-    category: 'AI Engineering',
-    description:
-      'Placeholder: describe the AI workflow, the models or agents involved and how it integrates with the product.',
-    stack: ['Python', 'FastAPI', 'LangGraph', 'OpenAI'],
-    visual: 'workflow',
-    image: '',
-    github: '',
-    live: '',
-    placeholder: true,
-  },
-  {
-    title: 'Project Title — API Platform',
-    category: 'Backend · Architecture',
-    description:
-      'Placeholder: describe the services, API design and the architectural decisions behind them.',
-    stack: ['Node.js', 'NestJS', 'REST'],
-    visual: 'api',
-    image: '',
-    github: '',
-    live: '',
-    placeholder: true,
-  },
 ];
